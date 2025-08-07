@@ -1,0 +1,4 @@
+name = "PhaseTypeDistributions"
+uuid = "08b9a7ee-cab5-43f1-84cc-91ff3c97629e"
+authors = ["GBarnsley <63357847+GBarnsley@users.noreply.github.com>"]
+version = "0.1.0"

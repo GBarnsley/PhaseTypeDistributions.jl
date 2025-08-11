@@ -1,6 +1,6 @@
-abstract type PhaseTypeDistribution <: ContinuousUnivariateDistribution end
+abstract type PhaseTypeDistribution{T} <: ContinuousUnivariateDistribution end
 
-struct PhaseType{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <: PhaseTypeDistribution
+struct PhaseType{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <: PhaseTypeDistribution{T}
     S::Tm
     α::Tv
 
@@ -65,8 +65,7 @@ d = PhaseType(S, α)
 ```
 
 # Notes
-- Phase-type distributions are dense in the class of positive-valued distributions
-- They include exponential, Erlang, hyperexponential, and hypoexponential distributions as special cases
+- Exponential, Erlang, Coxian, Hyperexponential, and Hypoexponential distributions are special cases of the PhaseType distribution
 - The support is [0, ∞)
 - Integer inputs are automatically converted to floating-point
 """
@@ -94,14 +93,8 @@ function rand(rng::AbstractRNG, t::transition_state)
     return (time, t.next[i])
 end
 
-function sampler(d::PhaseType{T}) where T
-    (; S, α, S⁰) = d
-
-    shape = size(S, 1)
-    starting_states = findall(α .> zero(T))
-    α_dist = DiscreteNonParametric(starting_states, α[starting_states])
-
-    all_states = Vector{transition_state{T}}(undef, shape)
+function setup_states(S, S⁰, T)
+    all_states = Vector{transition_state{T}}(undef, size(S, 1))
 
     for i in axes(S, 1)
         next = findall(S[i, :] .> zero(T))
@@ -113,12 +106,21 @@ function sampler(d::PhaseType{T}) where T
         end
         all_states[i] = transition_state(dists, next)
     end
+    return all_states
+end
+
+function sampler(d::PhaseTypeDistribution{T}) where T
+    (; S, α, S⁰) = d
+
+    starting_states = findall(α .> zero(T))
+    α_dist = DiscreteNonParametric(starting_states, α[starting_states])
+
+    all_states = setup_states(S, S⁰, T)
+
     return PhaseTypeSampler(α_dist, all_states)
 end
 
-function rand(rng::AbstractRNG, s::PhaseTypeSampler{T}) where T
-    states = s.states
-    current_state_index = rand(rng, s.α_dist)
+function sample_states(rng, states, current_state_index, T)
     x = zero(T)
     while true
         x⁺, current_state_index = rand(rng, states[current_state_index])
@@ -129,35 +131,39 @@ function rand(rng::AbstractRNG, s::PhaseTypeSampler{T}) where T
     end
 end
 
-function rand(rng::AbstractRNG, d::PhaseType) 
+function rand(rng::AbstractRNG, s::PhaseTypeSampler{T}) where T
+    return sample_states(rng, s.states, rand(rng, s.α_dist), T)
+end
+
+function rand(rng::AbstractRNG, d::PhaseTypeDistribution) 
     #really not that slow
     rand(rng, sampler(d))
 end
 
-function logpdf(d::PhaseType{T}, x::Real) where T
+function logpdf(d::PhaseTypeDistribution{T}, x::Real) where T
     insupport(d, x) ? log((d.α' * exp(d.S * x) * d.S⁰)[1, 1]) : -T(Inf)
 end
 
-function pdf(d::PhaseType{T}, x::Real) where T
+function pdf(d::PhaseTypeDistribution{T}, x::Real) where T
     insupport(d, x) ? (d.α' * exp(d.S * x) * d.S⁰)[1, 1] : zero(T)
 end
 
-function cdf(d::PhaseType{T}, x::Real) where T
+function cdf(d::PhaseTypeDistribution{T}, x::Real) where T
     insupport(d, x) ? 1 - sum(d.α' * exp(d.S * x)) : zero(T)
 end
 
-function quantile(d::PhaseType, q::Real)
+function quantile(d::PhaseTypeDistribution, q::Real)
     error("Quantile function not implemented for PhaseType distributions. import Optimization.jl for quantile approximation.")
 end
 
 #other functions
 
-insupport(d::PhaseType, x::Real) = x ≥ zero(x)
+insupport(d::PhaseTypeDistribution, x::Real) = x ≥ zero(x)
 
-minimum(d::PhaseType{T}) where T = zero(T)
-maximum(d::PhaseType{T}) where T = T(Inf)
+minimum(d::PhaseTypeDistribution{T}) where T = zero(T)
+maximum(d::PhaseTypeDistribution{T}) where T = T(Inf)
 
-mean(d::PhaseType{T}) where T = (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
-var(d::PhaseType{T}) where T = (2 * d.α' * inv(d.S) * inv(d.S) * ones(T, size(d.S, 1)) - (d.α' * inv(d.S) * ones(T, size(d.S, 1)))^2)[1]
-mgf(d::PhaseType, t) = -(d.α' * inv(d.S + t * I) * d.S⁰)[1]
-cf(d::PhaseType, t) = -(d.α' * inv(d.S + t * im * I) * d.S⁰)[1]
+mean(d::PhaseTypeDistribution{T}) where T = (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
+var(d::PhaseTypeDistribution{T}) where T = (2 * d.α' * inv(d.S) * inv(d.S) * ones(T, size(d.S, 1)) - (d.α' * inv(d.S) * ones(T, size(d.S, 1)))^2)[1]
+mgf(d::PhaseTypeDistribution, t) = -(d.α' * inv(d.S + t * I) * d.S⁰)[1]
+cf(d::PhaseTypeDistribution, t) = -(d.α' * inv(d.S + t * im * I) * d.S⁰)[1]

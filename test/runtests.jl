@@ -1,7 +1,7 @@
 using Test
 using Distributions
 using PhaseTypeDistributions
-using Aqua, JET, Pkg
+using Aqua, JET
 
 @testset "PhaseTypeDistributions.jl" begin
 
@@ -9,7 +9,7 @@ using Aqua, JET, Pkg
         Aqua.test_all(PhaseTypeDistributions)
     end
 
-    if pkgversion(JET) ≥ v"0.9"
+    if VERSION ≥ v"1.11"
         @testset "JET" begin
             JET.test_package(PhaseTypeDistributions)
         end

@@ -14,7 +14,6 @@ Distributions = "0.25"
 HypothesisTests = "0.11"
 JET = "0.4, 0.9, 0.10"
 LinearAlgebra = "1"
-Pkg = "1"
 Random = "1"
 Test = "1"
 julia = "1.6"
@@ -24,7 +23,6 @@ Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [targets]
-test = ["Test", "HypothesisTests", "Aqua", "JET", "Pkg"]
+test = ["Test", "HypothesisTests", "Aqua", "JET"]

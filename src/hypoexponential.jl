@@ -1,15 +1,14 @@
-struct Hypoexponential{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <: FixedInitialPhaseTypeDistribution{T}
+struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
+       FixedInitialPhaseTypeDistribution{T}
     λ::Tv
     #derived
     S::Tm
     α::Tv
     S⁰::Tv
-    function Hypoexponential{T}(λ::AbstractVector{T}; check_args::Bool=true) where T
-        @check_args(
-            Hypoexponential,
+    function Hypoexponential{T}(λ::AbstractVector{T}; check_args::Bool = true) where {T}
+        @check_args(Hypoexponential,
             (λ, length(λ) > 0, "λ must not be empty."),
-            (λ, all(λ .> zero(T)), "λ must be a valid transition vector.")
-        )
+            (λ, all(λ .> zero(T)), "λ must be a valid transition vector."))
         α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
@@ -69,14 +68,14 @@ d = PhaseType(S, α)
 - The support is [0, ∞)
 - Integer inputs are automatically converted to floating-point
 """
-function Hypoexponential(λ::AbstractVector{T}; check_args::Bool=true) where T<:Real
-    Hypoexponential{T}(λ; check_args=check_args)
+function Hypoexponential(λ::AbstractVector{T}; check_args::Bool = true) where {T <: Real}
+    Hypoexponential{T}(λ; check_args = check_args)
 end
-function Hypoexponential(λ::AbstractVector{Integer}; check_args::Bool=true)
-    Hypoexponential{eltype(float.(λ))}(float.(λ); check_args=check_args)
+function Hypoexponential(λ::AbstractVector{Integer}; check_args::Bool = true)
+    Hypoexponential{eltype(float.(λ))}(float.(λ); check_args = check_args)
 end
 
-struct HypoexponentialSampler{T <: Real} <: Sampleable{Univariate,Continuous}
+struct HypoexponentialSampler{T <: Real} <: Sampleable{Univariate, Continuous}
     dists::Vector{Exponential{T}}
 end
 
@@ -97,5 +96,5 @@ end
 
 #other functions
 mean(d::Hypoexponential) = sum(1 ./ d.λ)
-var(d::Hypoexponential) = sum((1 ./ d.λ).^2)
-skewness(d::Hypoexponential) = 2.0 * sum(1 ./ (d.λ .^ 3)) / (sum(1 ./ (d.λ .^ 2))^(3/2))
+var(d::Hypoexponential) = sum((1 ./ d.λ) .^ 2)
+skewness(d::Hypoexponential) = 2.0 * sum(1 ./ (d.λ .^ 3)) / (sum(1 ./ (d.λ .^ 2))^(3 / 2))

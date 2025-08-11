@@ -4,14 +4,13 @@ using PhaseTypeDistributions
 using Aqua, JET
 
 @testset "PhaseTypeDistributions.jl" begin
-
     @testset "Aqua" begin
         Aqua.test_all(PhaseTypeDistributions)
     end
 
     if VERSION ≥ v"1.11"
         @testset "JET" begin
-            JET.test_package(PhaseTypeDistributions; target_defined_modules=true)
+            JET.test_package(PhaseTypeDistributions; target_defined_modules = true)
         end
     end
 
@@ -21,5 +20,4 @@ using Aqua, JET
     include("test_hypoexponential.jl")
     include("test_hyperexponential.jl")
     include("test_comparisons.jl")
-
 end

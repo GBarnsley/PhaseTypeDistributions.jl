@@ -90,11 +90,7 @@ struct FixedInitialPhaseTypeSampler{T <: Real} <: Sampleable{Univariate,Continuo
 end
 
 function sampler(d::FixedInitialPhaseTypeDistribution{T}) where T
-    (; S, S⁰) = d
-
-    all_states = setup_states(S, S⁰, T)
-
-    return FixedInitialPhaseTypeSampler(all_states)
+    return FixedInitialPhaseTypeSampler(setup_states(d.S, d.S⁰, T))
 end
 
 function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler{T}) where T

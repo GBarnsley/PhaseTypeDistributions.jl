@@ -110,12 +110,11 @@ function setup_states(S, S⁰, T)
 end
 
 function sampler(d::PhaseTypeDistribution{T}) where T
-    (; S, α, S⁰) = d
 
-    starting_states = findall(α .> zero(T))
-    α_dist = DiscreteNonParametric(starting_states, α[starting_states])
+    starting_states = findall(d.α .> zero(T))
+    α_dist = DiscreteNonParametric(starting_states, d.α[starting_states])
 
-    all_states = setup_states(S, S⁰, T)
+    all_states = setup_states(d.S, d.S⁰, T)
 
     return PhaseTypeSampler(α_dist, all_states)
 end

@@ -1,20 +1,21 @@
 abstract type FixedInitialPhaseTypeDistribution{T} <: PhaseTypeDistribution{T} end
 
-struct Coxian{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <: FixedInitialPhaseTypeDistribution{T}
+struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
+       FixedInitialPhaseTypeDistribution{T}
     λ::Tv
     p::Tv
     #derived
     S::Tm
     α::Tv
     S⁰::Tv
-    function Coxian{T}(λ::AbstractVector{T}, p::AbstractVector{T}; check_args::Bool=true) where T
-        @check_args(
-            Coxian,
+    function Coxian{T}(
+            λ::AbstractVector{T}, p::AbstractVector{T}; check_args::Bool = true) where {T}
+        @check_args(Coxian,
             (λ, length(λ) > 0, "λ must not be empty."),
-            (p, all(x -> x ≥ zero(T) && x ≤ one(T), p), "p must be a vector of probabilities."),
+            (p, all(x -> x ≥ zero(T) && x ≤ one(T), p),
+                "p must be a vector of probabilities."),
             (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
-            ((λ, p), length(λ) == (length(p) + 1), "p should have one less entry than λ.")
-        )
+            ((λ, p), length(λ) == (length(p) + 1), "p should have one less entry than λ."))
         α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
@@ -78,38 +79,40 @@ d = PhaseType(S, α)
 - The support is [0, ∞)
 - Integer inputs are automatically converted to floating-point
 """
-function Coxian(λ::AbstractVector{T}, p::AbstractVector{T}; check_args::Bool=true) where T<:Real
-    Coxian{T}(λ, p; check_args=check_args)
+function Coxian(λ::AbstractVector{T}, p::AbstractVector{T};
+        check_args::Bool = true) where {T <: Real}
+    Coxian{T}(λ, p; check_args = check_args)
 end
-function Coxian(λ::AbstractVector{Integer}, p::AbstractVector{Integer}; check_args::Bool=true)
-    Coxian{eltype(float.(λ))}(float.(λ), float.(p); check_args=check_args)
+function Coxian(
+        λ::AbstractVector{Integer}, p::AbstractVector{Integer}; check_args::Bool = true)
+    Coxian{eltype(float.(λ))}(float.(λ), float.(p); check_args = check_args)
 end
 
-struct FixedInitialPhaseTypeSampler{T <: Real} <: Sampleable{Univariate,Continuous}
+struct FixedInitialPhaseTypeSampler{T <: Real} <: Sampleable{Univariate, Continuous}
     states::Vector{transition_state{T}}
 end
 
-function sampler(d::FixedInitialPhaseTypeDistribution{T}) where T
-    return FixedInitialPhaseTypeSampler(setup_states(d.S, d.S⁰, T))
+function sampler(d::FixedInitialPhaseTypeDistribution)
+    return FixedInitialPhaseTypeSampler(setup_states(d))
 end
 
-function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler{T}) where T
-    sample_states(rng, s.states, 1, T)
+function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler)
+    sample_states(rng, s.states, 1)
 end
 
-function rand(rng::AbstractRNG, d::FixedInitialPhaseTypeDistribution) 
+function rand(rng::AbstractRNG, d::FixedInitialPhaseTypeDistribution)
     #really not that slow
     rand(rng, sampler(d))
 end
 
-function logpdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where T
+function logpdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
     insupport(d, x) ? log((exp(d.S * x)[1:1, :] * d.S⁰)[1, 1]) : -T(Inf)
 end
 
-function pdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where T
+function pdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
     insupport(d, x) ? (exp(d.S * x)[1:1, :] * d.S⁰)[1, 1] : zero(T)
 end
 
-function cdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where T
+function cdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
     insupport(d, x) ? 1 - sum(exp(d.S * x)[1:1, :]) : zero(T)
 end

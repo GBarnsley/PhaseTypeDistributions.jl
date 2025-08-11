@@ -1,8 +1,8 @@
 using Documenter, PhaseTypeDistributions
 
 makedocs(
-    sitename="Phase Type Distributions",
-    pages    = [
+    sitename = "Phase Type Distributions",
+    pages = [
         "index.md"
     ]
 )

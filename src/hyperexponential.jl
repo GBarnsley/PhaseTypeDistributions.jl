@@ -1,5 +1,6 @@
 @doc raw"""
-    Hyperexponential(λ; check_args=true)
+    Hyperexponential(λ; check_    MixtureModel(Exponential, [(r,) for r in 1 ./ λ], α)
+end
 
 Construct a Hyperexponential distribution with transition rates `λ` and entry probability `α`.
 
@@ -40,13 +41,12 @@ d = PhaseType(S, α)
 # Notes
 - The support is [0, ∞)
 """
-function Hyperexponential(λ::AbstractVector{T}, α::AbstractVector{T}; check_args::Bool=true) where T<:Real
-    @check_args(
-        Hyperexponential,
+function Hyperexponential(λ::AbstractVector{T}, α::AbstractVector{T};
+        check_args::Bool = true) where {T <: Real}
+    @check_args(Hyperexponential,
         (λ, length(λ) > 0, "λ must not be empty."),
         (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T), "α must be a probability vector."),
         (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
-        ((α, λ), length(λ) == length(α), "λ and α must have the same length.")
-    )
-    MixtureModel(Exponential, 1 ./  λ, α)
+        ((α, λ), length(λ) == length(α), "λ and α must have the same length."))
+    MixtureModel([Exponential(r) for r in 1 ./ λ], α)
 end

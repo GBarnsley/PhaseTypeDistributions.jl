@@ -7,9 +7,10 @@ struct Hypoexponential{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}
     function Hypoexponential{T}(λ::AbstractVector{T}; check_args::Bool=true) where T
         @check_args(
             Hypoexponential,
+            (λ, length(λ) > 0, "λ must not be empty."),
             (λ, all(λ .> zero(T)), "λ must be a valid transition vector.")
         )
-        α = Vector{T}(undef, length(λ))
+        α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
         for i in eachindex(λ)
@@ -87,11 +88,11 @@ function sampler(d::Hypoexponential)
 end
 
 function rand(rng::AbstractRNG, s::HypoexponentialSampler)
-    sum(rand(rng, s.dists))
+    sum(rand.(rng, s.dists))
 end
 
 function rand(rng::AbstractRNG, d::Hypoexponential)
-    sum(rand(rng, Exponential.(1 ./ d.λ)))
+    sum(rand.(rng, Exponential.(1 ./ d.λ)))
 end
 
 #other functions

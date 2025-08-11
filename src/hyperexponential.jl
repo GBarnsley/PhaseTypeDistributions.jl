@@ -43,6 +43,7 @@ d = PhaseType(S, α)
 function Hyperexponential(λ::AbstractVector{T}, α::AbstractVector{T}; check_args::Bool=true) where T<:Real
     @check_args(
         Hyperexponential,
+        (λ, length(λ) > 0, "λ must not be empty."),
         (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T), "α must be a probability vector."),
         (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
         ((α, λ), length(λ) == length(α), "λ and α must have the same length.")

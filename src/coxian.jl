@@ -10,11 +10,12 @@ struct Coxian{T<:Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <: Fixe
     function Coxian{T}(λ::AbstractVector{T}, p::AbstractVector{T}; check_args::Bool=true) where T
         @check_args(
             Coxian,
+            (λ, length(λ) > 0, "λ must not be empty."),
             (p, all(x -> x ≥ zero(T) && x ≤ one(T), p), "p must be a vector of probabilities."),
             (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
-            ((λ, p), length(λ) == (length(p) - 1), "p should have one less entry than λ.")
+            ((λ, p), length(λ) == (length(p) + 1), "p should have one less entry than λ.")
         )
-        α = Vector{T}(undef, length(λ))
+        α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
         for i in eachindex(λ)

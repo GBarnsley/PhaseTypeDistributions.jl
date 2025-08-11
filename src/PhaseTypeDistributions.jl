@@ -11,5 +11,6 @@ import Random: AbstractRNG, rand
 include("phasetype.jl")
 include("coxian.jl")
 include("hypoexponential.jl")
+include("hyperexponential.jl")
 
 end # module PhaseTypeDistributions

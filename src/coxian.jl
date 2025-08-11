@@ -89,12 +89,12 @@ struct FixedInitialPhaseTypeSampler{T <: Real} <: Sampleable{Univariate,Continuo
     states::Vector{transition_state{T}}
 end
 
-function sampler(d::FixedInitialPhaseTypeDistribution{T}) where T
-    return FixedInitialPhaseTypeSampler(setup_states(d.S, d.S⁰, T))
+function sampler(d::FixedInitialPhaseTypeDistribution)
+    return FixedInitialPhaseTypeSampler(setup_states(d))
 end
 
-function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler{T}) where T
-    sample_states(rng, s.states, 1, T)
+function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler)
+    sample_states(rng, s.states, 1)
 end
 
 function rand(rng::AbstractRNG, d::FixedInitialPhaseTypeDistribution) 

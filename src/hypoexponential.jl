@@ -81,7 +81,7 @@ struct HypoexponentialSampler{T <: Real} <: Sampleable{Univariate,Continuous}
 end
 
 function sampler(d::Hypoexponential)
-
+    #Should make this the sampleables of the Exponential instead of the exponentials
     all_dists = Exponential.(1 ./ d.λ)
 
     return HypoexponentialSampler(all_dists)

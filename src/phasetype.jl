@@ -8,7 +8,9 @@ struct PhaseType{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
     #derived
     S⁰::Tv
     function PhaseType{T, Tm, Tv}(
-            S::Tm, α::Tv; check_args::Bool = true) where {T, Tm<:AbstractMatrix{T}, Tv<:AbstractVector{T}}
+            S::Tm, α::Tv;
+            check_args::Bool = true) where {
+            T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}}
         @check_args(PhaseType,
             (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T),
                 "α must be a probability vector."),
@@ -72,14 +74,17 @@ d = PhaseType(S, α)
 - Integer inputs are automatically converted to floating-point
 """
 function PhaseType(S::Tm, α::Tv;
-        check_args::Bool = true) where {T, Tm<:AbstractMatrix{T}, Tv<:AbstractVector{T}}
+        check_args::Bool = true) where {T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}}
     PhaseType{T, Tm, Tv}(S, α; check_args = check_args)
 end
 function PhaseType(
-        S::Tm, α::Tv; check_args::Bool = true) where {Tm<:AbstractMatrix{Int}, Tv<:AbstractVector{Int}}
+        S::Tm, α::Tv;
+        check_args::Bool = true) where {
+        Tm <: AbstractMatrix{Int}, Tv <: AbstractVector{Int}}
     float_S = float.(S)
     float_α = float.(α)
-    PhaseType{eltype(float_α), typeof(float_S), typeof(float_α)}(float_S, float_α; check_args = check_args)
+    PhaseType{eltype(float_α), typeof(float_S), typeof(float_α)}(
+        float_S, float_α; check_args = check_args)
 end
 
 ## Sampling
@@ -88,7 +93,8 @@ struct transition_state{T <: Real}
     next::Vector{Int}
 end
 
-struct PhaseTypeSampler{T <: Real, Tv <: AbstractVector{T}} <: Sampleable{Univariate, Continuous}
+struct PhaseTypeSampler{T <: Real, Tv <: AbstractVector{T}} <:
+       Sampleable{Univariate, Continuous}
     α_dist::DiscreteNonParametric{Int, T, Vector{Int}, Tv}
     states::Vector{transition_state{T}}
 end
@@ -115,7 +121,7 @@ function setup_states(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv}
     return all_states
 end
 
-function sampler(d::PhaseTypeDistribution{T, Tm, Tv}) where {T<:Real, Tm, Tv}
+function sampler(d::PhaseTypeDistribution{T, Tm, Tv}) where {T <: Real, Tm, Tv}
     starting_states = findall(d.α .> zero(T))
     α_dist = DiscreteNonParametric(starting_states, d.α[starting_states])
 
@@ -168,7 +174,9 @@ insupport(d::PhaseTypeDistribution, x::Real) = x ≥ zero(x)
 minimum(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv} = zero(T)
 maximum(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv} = T(Inf)
 
-mean(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv} = (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
+function mean(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv}
+    (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
+end
 function var(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv}
     (2 * d.α' * inv(d.S) * inv(d.S) * ones(T, size(d.S, 1)) - (d.α' * inv(d.S) * ones(T, size(d.S, 1)))^2)[1]
 end

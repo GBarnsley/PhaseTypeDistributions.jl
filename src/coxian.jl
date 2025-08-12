@@ -1,6 +1,8 @@
-abstract type FixedInitialPhaseTypeDistribution{T, Tm, Tv} <: PhaseTypeDistribution{T, Tm, Tv} end
+abstract type FixedInitialPhaseTypeDistribution{T, Tm, Tv} <:
+              PhaseTypeDistribution{T, Tm, Tv} end
 
-struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}, TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
+struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
+    TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
        FixedInitialPhaseTypeDistribution{T, Tm, Tv}
     p::TvP
     λ::Tvλ
@@ -9,7 +11,9 @@ struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}, TvP <
     α::Tv
     S⁰::Tv
     function Coxian{T}(
-            λ::Tvλ, p::TvP; check_args::Bool = true) where{T<:Real, TvP<:AbstractVector{T}, Tvλ<:AbstractVector{T}}
+            λ::Tvλ, p::TvP;
+            check_args::Bool = true) where {
+            T <: Real, TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}}
         @check_args(Coxian,
             (λ, length(λ) > 0, "λ must not be empty."),
             (p, all(x -> x ≥ zero(T) && x ≤ one(T), p),

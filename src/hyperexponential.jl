@@ -42,7 +42,7 @@ d = PhaseType(S, α)
 - The support is [0, ∞)
 """
 function Hyperexponential(λ::Tv, α::Tv;
-        check_args::Bool = true) where {T <: Real, Tv<:AbstractVector{T}}
+        check_args::Bool = true) where {T <: Real, Tv <: AbstractVector{T}}
     @check_args(Hyperexponential,
         (λ, length(λ) > 0, "λ must not be empty."),
         (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T), "α must be a probability vector."),

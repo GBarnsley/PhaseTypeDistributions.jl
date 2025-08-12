@@ -17,7 +17,7 @@ using Aqua, JET
 
     if VERSION ≥ v"1.11"
         @testset "JET" begin
-            JET.test_package(PhaseTypeDistributions; target_defined_modules = true)
+            JET.test_package(PhaseTypeDistributions)
         end
     end
 end

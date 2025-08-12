@@ -1,15 +1,19 @@
-abstract type FixedInitialPhaseTypeDistribution{T} <: PhaseTypeDistribution{T} end
+abstract type FixedInitialPhaseTypeDistribution{T, Tm, Tv} <:
+              PhaseTypeDistribution{T, Tm, Tv} end
 
-struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
-       FixedInitialPhaseTypeDistribution{T}
-    λ::Tv
-    p::Tv
+struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
+    TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
+       FixedInitialPhaseTypeDistribution{T, Tm, Tv}
+    p::TvP
+    λ::Tvλ
     #derived
     S::Tm
     α::Tv
     S⁰::Tv
     function Coxian{T}(
-            λ::AbstractVector{T}, p::AbstractVector{T}; check_args::Bool = true) where {T}
+            λ::Tvλ, p::TvP;
+            check_args::Bool = true) where {
+            T <: Real, TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}}
         @check_args(Coxian,
             (λ, length(λ) > 0, "λ must not be empty."),
             (p, all(x -> x ≥ zero(T) && x ≤ one(T), p),
@@ -26,7 +30,7 @@ struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
             end
         end
         S⁰ = vec(-sum(S, dims = 2))
-        new{T, typeof(S), typeof(α)}(λ, p, S, α, S⁰)
+        new{T, Matrix{T}, Vector{T}, TvP, Tvλ}(p, λ, S, α, S⁰)
     end
 end
 
@@ -105,14 +109,14 @@ function rand(rng::AbstractRNG, d::FixedInitialPhaseTypeDistribution)
     rand(rng, sampler(d))
 end
 
-function logpdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
+function logpdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
     insupport(d, x) ? log((exp(d.S * x)[1:1, :] * d.S⁰)[1, 1]) : -T(Inf)
 end
 
-function pdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
+function pdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
     insupport(d, x) ? (exp(d.S * x)[1:1, :] * d.S⁰)[1, 1] : zero(T)
 end
 
-function cdf(d::FixedInitialPhaseTypeDistribution{T}, x::Real) where {T}
+function cdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
     insupport(d, x) ? 1 - sum(exp(d.S * x)[1:1, :]) : zero(T)
 end

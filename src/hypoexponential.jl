@@ -1,11 +1,13 @@
-struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
-       FixedInitialPhaseTypeDistribution{T}
-    λ::Tv
+struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T},
+    Tv <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
+       FixedInitialPhaseTypeDistribution{T, Tm, Tv}
+    λ::Tvλ
     #derived
     S::Tm
     α::Tv
     S⁰::Tv
-    function Hypoexponential{T}(λ::AbstractVector{T}; check_args::Bool = true) where {T}
+    function Hypoexponential{T}(
+            λ::Tvλ; check_args::Bool = true) where {T, Tvλ <: AbstractVector{T}}
         @check_args(Hypoexponential,
             (λ, length(λ) > 0, "λ must not be empty."),
             (λ, all(λ .> zero(T)), "λ must be a valid transition vector."))
@@ -20,7 +22,7 @@ struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{
         end
         S⁰ = zeros(T, length(λ))
         S⁰[end] = λ[end]
-        new{T, typeof(S), typeof(α)}(λ, S, α, S⁰)
+        new{T, Matrix{T}, Vector{T}, Tvλ}(λ, S, α, S⁰)
     end
 end
 

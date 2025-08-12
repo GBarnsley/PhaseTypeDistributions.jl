@@ -8,16 +8,16 @@ using Aqua, JET
         Aqua.test_all(PhaseTypeDistributions)
     end
 
-    if VERSION ≥ v"1.11"
-        @testset "JET" begin
-            JET.test_package(PhaseTypeDistributions; target_defined_modules = true)
-        end
-    end
-
     # Include tests for specific distributions
     include("test_phasetype.jl")
     include("test_coxian.jl")
     include("test_hypoexponential.jl")
     include("test_hyperexponential.jl")
     include("test_comparisons.jl")
+
+    if VERSION ≥ v"1.11"
+        @testset "JET" begin
+            JET.test_package(PhaseTypeDistributions)
+        end
+    end
 end

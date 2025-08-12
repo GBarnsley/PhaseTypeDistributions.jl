@@ -41,12 +41,12 @@ d = PhaseType(S, α)
 # Notes
 - The support is [0, ∞)
 """
-function Hyperexponential(λ::AbstractVector{T}, α::AbstractVector{T};
-        check_args::Bool = true) where {T <: Real}
+function Hyperexponential(λ::Tv, α::Tv;
+        check_args::Bool = true) where {T <: Real, Tv <: AbstractVector{T}}
     @check_args(Hyperexponential,
         (λ, length(λ) > 0, "λ must not be empty."),
         (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T), "α must be a probability vector."),
         (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
         ((α, λ), length(λ) == length(α), "λ and α must have the same length."))
-    MixtureModel([Exponential(r) for r in 1 ./ λ], α)
+    MixtureModel(Exponential.(1 ./ λ), Categorical(α))
 end

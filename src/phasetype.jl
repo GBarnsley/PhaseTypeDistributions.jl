@@ -87,7 +87,7 @@ struct transition_state{T <: Real}
 end
 
 struct PhaseTypeSampler{T <: Real} <: Sampleable{Univariate, Continuous}
-    α_dist::DiscreteNonParametric
+    α_dist::DiscreteNonParametricSampler{Int, Vector{Int}, AliasTable}
     states::Vector{transition_state{T}}
 end
 
@@ -98,7 +98,6 @@ function rand(rng::AbstractRNG, t::transition_state)
 end
 
 function setup_states(d::PhaseTypeDistribution{T}) where {T}
-    #Should make this the sampleables of the Exponential instead of the exponentials
     all_states = Vector{transition_state{T}}(undef, size(d.S, 1))
 
     for i in axes(d.S, 1)
@@ -115,10 +114,8 @@ function setup_states(d::PhaseTypeDistribution{T}) where {T}
 end
 
 function sampler(d::PhaseTypeDistribution{T}) where {T}
-
-    #Should make this the sampleables of the DiscreteNonParametric instead of the exponentials
     starting_states = findall(d.α .> zero(T))
-    α_dist = DiscreteNonParametric(starting_states, d.α[starting_states])
+    α_dist = DiscreteNonParametricSampler(starting_states, d.α[starting_states])
 
     all_states = setup_states(d)
 

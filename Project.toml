@@ -1,7 +1,7 @@
 name = "PhaseTypeDistributions"
 uuid = "08b9a7ee-cab5-43f1-84cc-91ff3c97629e"
-authors = ["GBarnsley <63357847+GBarnsley@users.noreply.github.com>"]
 version = "0.1.0"
+authors = ["GBarnsley <63357847+GBarnsley@users.noreply.github.com>"]
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -12,7 +12,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Aqua = "0.8"
 Distributions = "0.25"
 HypothesisTests = "0.11"
-JET = "0.4, 0.9, 0.10"
+JET = "0.4, 0.9, 0.10, 0.11"
 LinearAlgebra = "1"
 Random = "1"
 Test = "1"

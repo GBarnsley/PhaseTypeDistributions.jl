@@ -1,7 +1,7 @@
 abstract type PhaseTypeDistribution{T, Tm, Tv} <: ContinuousUnivariateDistribution end
 
 struct PhaseType{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
-       PhaseTypeDistribution{T, Tm, Tv}
+    PhaseTypeDistribution{T, Tm, Tv}
     S::Tm
     α::Tv
 
@@ -9,17 +9,22 @@ struct PhaseType{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}} <:
     S⁰::Tv
     function PhaseType{T, Tm, Tv}(
             S::Tm, α::Tv;
-            check_args::Bool = true) where {
-            T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}}
-        @check_args(PhaseType,
-            (α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T),
-                "α must be a probability vector."),
+            check_args::Bool = true
+        ) where {
+            T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
+        }
+        @check_args(
+            PhaseType,
+            (
+                α, all(x -> x ≥ zero(x), α) && sum(α) ≈ one(T),
+                "α must be a probability vector.",
+            ),
             (S, all(diag(S) .< zero(T)), "S must be a valid transition matrix."),
             (S, all(S[.!I(size(S, 1))] .≥ zero(T)), "S must be a valid transition matrix.")
             #(S, all(sum(S[1:(end - 1), :], dims=2) .≈ zero(T)), "S must be a valid transition matrix.") Not needed for this save for hypo
         )
         S⁰ = vec(-sum(S, dims = 2))
-        new{T, Tm, Tv}(S, α, S⁰)
+        return new{T, Tm, Tv}(S, α, S⁰)
     end
 end
 
@@ -73,18 +78,23 @@ d = PhaseType(S, α)
 - The support is [0, ∞)
 - Integer inputs are automatically converted to floating-point
 """
-function PhaseType(S::Tm, α::Tv;
-        check_args::Bool = true) where {T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}}
-    PhaseType{T, Tm, Tv}(S, α; check_args = check_args)
+function PhaseType(
+        S::Tm, α::Tv;
+        check_args::Bool = true
+    ) where {T, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T}}
+    return PhaseType{T, Tm, Tv}(S, α; check_args = check_args)
 end
 function PhaseType(
         S::Tm, α::Tv;
-        check_args::Bool = true) where {
-        Tm <: AbstractMatrix{Int}, Tv <: AbstractVector{Int}}
+        check_args::Bool = true
+    ) where {
+        Tm <: AbstractMatrix{Int}, Tv <: AbstractVector{Int},
+    }
     float_S = float.(S)
     float_α = float.(α)
-    PhaseType{eltype(float_α), typeof(float_S), typeof(float_α)}(
-        float_S, float_α; check_args = check_args)
+    return PhaseType{eltype(float_α), typeof(float_S), typeof(float_α)}(
+        float_S, float_α; check_args = check_args
+    )
 end
 
 ## Sampling
@@ -94,7 +104,7 @@ struct transition_state{T <: Real}
 end
 
 struct PhaseTypeSampler{T <: Real, Tv <: AbstractVector{T}} <:
-       Sampleable{Univariate, Continuous}
+    Sampleable{Univariate, Continuous}
     α_dist::DiscreteNonParametric{Int, T, Vector{Int}, Tv}
     states::Vector{transition_state{T}}
 end
@@ -130,8 +140,10 @@ function sampler(d::PhaseTypeDistribution{T, Tm, Tv}) where {T <: Real, Tm, Tv}
     return PhaseTypeSampler{T, Tv}(α_dist, all_states)
 end
 
-function sample_states(rng::AbstractRNG, states::Vector{transition_state{T}},
-        current_state_index::Int) where {T <: Real}
+function sample_states(
+        rng::AbstractRNG, states::Vector{transition_state{T}},
+        current_state_index::Int
+    ) where {T <: Real}
     x = zero(T)
     while true
         x⁺, current_state_index = rand(rng, states[current_state_index])
@@ -140,6 +152,7 @@ function sample_states(rng::AbstractRNG, states::Vector{transition_state{T}},
             return x
         end
     end
+    return
 end
 
 function rand(rng::AbstractRNG, s::PhaseTypeSampler{T}) where {T}
@@ -148,19 +161,19 @@ end
 
 function rand(rng::AbstractRNG, d::PhaseTypeDistribution)
     #really not that slow
-    rand(rng, sampler(d))
+    return rand(rng, sampler(d))
 end
 
 function logpdf(d::PhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? log((d.α' * exp(d.S * x) * d.S⁰)[1, 1]) : -T(Inf)
+    return insupport(d, x) ? log((d.α' * exp(d.S * x) * d.S⁰)[1, 1]) : -T(Inf)
 end
 
 function pdf(d::PhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? (d.α' * exp(d.S * x) * d.S⁰)[1, 1] : zero(T)
+    return insupport(d, x) ? (d.α' * exp(d.S * x) * d.S⁰)[1, 1] : zero(T)
 end
 
 function cdf(d::PhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? 1 - sum(d.α' * exp(d.S * x)) : zero(T)
+    return insupport(d, x) ? 1 - sum(d.α' * exp(d.S * x)) : zero(T)
 end
 
 function quantile(d::PhaseTypeDistribution, q::Real)
@@ -175,10 +188,10 @@ minimum(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv} = zero(T)
 maximum(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv} = T(Inf)
 
 function mean(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv}
-    (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
+    return (-d.α' * inv(d.S) * ones(T, size(d.S, 1)))[1]
 end
 function var(d::PhaseTypeDistribution{T, Tm, Tv}) where {T, Tm, Tv}
-    (2 * d.α' * inv(d.S) * inv(d.S) * ones(T, size(d.S, 1)) - (d.α' * inv(d.S) * ones(T, size(d.S, 1)))^2)[1]
+    return (2 * d.α' * inv(d.S) * inv(d.S) * ones(T, size(d.S, 1)) - (d.α' * inv(d.S) * ones(T, size(d.S, 1)))^2)[1]
 end
 mgf(d::PhaseTypeDistribution, t) = -(d.α' * inv(d.S + t * I) * d.S⁰)[1]
 cf(d::PhaseTypeDistribution, t) = -(d.α' * inv(d.S + t * im * I) * d.S⁰)[1]

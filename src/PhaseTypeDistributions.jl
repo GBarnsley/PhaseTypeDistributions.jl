@@ -3,10 +3,10 @@ module PhaseTypeDistributions
 export PhaseType, Coxian, Hypoexponential, Hyperexponential
 
 import Distributions: ContinuousUnivariateDistribution, Exponential, @check_args,
-                      Sampleable, Univariate, Continuous, AliasTable,
-                      MixtureModel, DiscreteNonParametric, Categorical
+    Sampleable, Univariate, Continuous, AliasTable,
+    MixtureModel, DiscreteNonParametric, Categorical
 import Distributions: pdf, logpdf, cdf, quantile, minimum, maximum, mean, var, mgf, cf,
-                      insupport
+    insupport
 
 import LinearAlgebra: diag, I, inv
 import Random: AbstractRNG, rand

@@ -1,9 +1,11 @@
 abstract type FixedInitialPhaseTypeDistribution{T, Tm, Tv} <:
-              PhaseTypeDistribution{T, Tm, Tv} end
+PhaseTypeDistribution{T, Tm, Tv} end
 
-struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
-    TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
-       FixedInitialPhaseTypeDistribution{T, Tm, Tv}
+struct Coxian{
+        T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
+        TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T},
+    } <:
+    FixedInitialPhaseTypeDistribution{T, Tm, Tv}
     p::TvP
     λ::Tvλ
     #derived
@@ -12,14 +14,20 @@ struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
     S⁰::Tv
     function Coxian{T}(
             λ::Tvλ, p::TvP;
-            check_args::Bool = true) where {
-            T <: Real, TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T}}
-        @check_args(Coxian,
+            check_args::Bool = true
+        ) where {
+            T <: Real, TvP <: AbstractVector{T}, Tvλ <: AbstractVector{T},
+        }
+        @check_args(
+            Coxian,
             (λ, length(λ) > 0, "λ must not be empty."),
-            (p, all(x -> x ≥ zero(T) && x ≤ one(T), p),
-                "p must be a vector of probabilities."),
+            (
+                p, all(x -> x ≥ zero(T) && x ≤ one(T), p),
+                "p must be a vector of probabilities.",
+            ),
             (λ, all(λ .> zero(T)), "λ must be a valid transition vector."),
-            ((λ, p), length(λ) == (length(p) + 1), "p should have one less entry than λ."))
+            ((λ, p), length(λ) == (length(p) + 1), "p should have one less entry than λ.")
+        )
         α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
@@ -30,7 +38,7 @@ struct Coxian{T <: Real, Tm <: AbstractMatrix{T}, Tv <: AbstractVector{T},
             end
         end
         S⁰ = vec(-sum(S, dims = 2))
-        new{T, Matrix{T}, Vector{T}, TvP, Tvλ}(p, λ, S, α, S⁰)
+        return new{T, Matrix{T}, Vector{T}, TvP, Tvλ}(p, λ, S, α, S⁰)
     end
 end
 
@@ -83,13 +91,16 @@ d = PhaseType(S, α)
 - The support is [0, ∞)
 - Integer inputs are automatically converted to floating-point
 """
-function Coxian(λ::AbstractVector{T}, p::AbstractVector{T};
-        check_args::Bool = true) where {T <: Real}
-    Coxian{T}(λ, p; check_args = check_args)
+function Coxian(
+        λ::AbstractVector{T}, p::AbstractVector{T};
+        check_args::Bool = true
+    ) where {T <: Real}
+    return Coxian{T}(λ, p; check_args = check_args)
 end
 function Coxian(
-        λ::AbstractVector{Integer}, p::AbstractVector{Integer}; check_args::Bool = true)
-    Coxian{eltype(float.(λ))}(float.(λ), float.(p); check_args = check_args)
+        λ::AbstractVector{Integer}, p::AbstractVector{Integer}; check_args::Bool = true
+    )
+    return Coxian{eltype(float.(λ))}(float.(λ), float.(p); check_args = check_args)
 end
 
 struct FixedInitialPhaseTypeSampler{T <: Real} <: Sampleable{Univariate, Continuous}
@@ -101,22 +112,22 @@ function sampler(d::FixedInitialPhaseTypeDistribution)
 end
 
 function rand(rng::AbstractRNG, s::FixedInitialPhaseTypeSampler)
-    sample_states(rng, s.states, 1)
+    return sample_states(rng, s.states, 1)
 end
 
 function rand(rng::AbstractRNG, d::FixedInitialPhaseTypeDistribution)
     #really not that slow
-    rand(rng, sampler(d))
+    return rand(rng, sampler(d))
 end
 
 function logpdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? log((exp(d.S * x)[1:1, :] * d.S⁰)[1, 1]) : -T(Inf)
+    return insupport(d, x) ? log((exp(d.S * x)[1:1, :] * d.S⁰)[1, 1]) : -T(Inf)
 end
 
 function pdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? (exp(d.S * x)[1:1, :] * d.S⁰)[1, 1] : zero(T)
+    return insupport(d, x) ? (exp(d.S * x)[1:1, :] * d.S⁰)[1, 1] : zero(T)
 end
 
 function cdf(d::FixedInitialPhaseTypeDistribution{T, Tm, Tv}, x::Real) where {T, Tm, Tv}
-    insupport(d, x) ? 1 - sum(exp(d.S * x)[1:1, :]) : zero(T)
+    return insupport(d, x) ? 1 - sum(exp(d.S * x)[1:1, :]) : zero(T)
 end

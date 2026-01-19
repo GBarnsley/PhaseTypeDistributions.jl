@@ -73,9 +73,9 @@
         @test cdf(pt, 0.0) ≈ 0.0
 
         # Test PDF and CDF consistency (fundamental theorem of calculus approximation)
-        h = 1e-4  # Increased step size for better numerical stability
+        h = 1.0e-4  # Increased step size for better numerical stability
         x = 1.0
-        @test abs((cdf(pt, x + h) - cdf(pt, x)) / h - pdf(pt, x)) < 1e-3  # Relaxed tolerance
+        @test abs((cdf(pt, x + h) - cdf(pt, x)) / h - pdf(pt, x)) < 1.0e-3  # Relaxed tolerance
     end
 
     @testset "PhaseType Statistical Moments" begin
@@ -98,13 +98,13 @@
         S_inv = inv(S)
         ones_vec = ones(size(S, 1))
         expected_mean = (-α' * S_inv * ones_vec)[1]
-        @test μ≈expected_mean rtol=1e-10
+        @test μ ≈ expected_mean rtol = 1.0e-10
 
         # Test moment generating function at t=0 should be 1
-        @test mgf(pt, 0.0)≈1.0 rtol=1e-10
+        @test mgf(pt, 0.0) ≈ 1.0 rtol = 1.0e-10
 
         # Test characteristic function at t=0 should be 1
-        @test cf(pt, 0.0)≈1.0 rtol=1e-10
+        @test cf(pt, 0.0) ≈ 1.0 rtol = 1.0e-10
     end
 
     @testset "PhaseType Sampling" begin
@@ -173,7 +173,7 @@
 
         # Test with very small probabilities
         S = [-1.0 0.5; 0.0 -2.0]
-        α = [1e-10, 1.0 - 1e-10]
+        α = [1.0e-10, 1.0 - 1.0e-10]
         @test_nowarn PhaseType(S, α)
         pt_small = PhaseType(S, α)
         @test isfinite(mean(pt_small))

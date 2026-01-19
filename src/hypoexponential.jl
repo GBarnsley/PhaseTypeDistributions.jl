@@ -1,16 +1,21 @@
-struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T},
-    Tv <: AbstractVector{T}, Tvλ <: AbstractVector{T}} <:
-       FixedInitialPhaseTypeDistribution{T, Tm, Tv}
+struct Hypoexponential{
+        T <: Real, Tm <: AbstractMatrix{T},
+        Tv <: AbstractVector{T}, Tvλ <: AbstractVector{T},
+    } <:
+    FixedInitialPhaseTypeDistribution{T, Tm, Tv}
     λ::Tvλ
     #derived
     S::Tm
     α::Tv
     S⁰::Tv
     function Hypoexponential{T}(
-            λ::Tvλ; check_args::Bool = true) where {T, Tvλ <: AbstractVector{T}}
-        @check_args(Hypoexponential,
+            λ::Tvλ; check_args::Bool = true
+        ) where {T, Tvλ <: AbstractVector{T}}
+        @check_args(
+            Hypoexponential,
             (λ, length(λ) > 0, "λ must not be empty."),
-            (λ, all(λ .> zero(T)), "λ must be a valid transition vector."))
+            (λ, all(λ .> zero(T)), "λ must be a valid transition vector.")
+        )
         α = zeros(T, length(λ))
         α[1] = one(T)
         S = zeros(T, length(λ), length(λ))
@@ -22,7 +27,7 @@ struct Hypoexponential{T <: Real, Tm <: AbstractMatrix{T},
         end
         S⁰ = zeros(T, length(λ))
         S⁰[end] = λ[end]
-        new{T, Matrix{T}, Vector{T}, Tvλ}(λ, S, α, S⁰)
+        return new{T, Matrix{T}, Vector{T}, Tvλ}(λ, S, α, S⁰)
     end
 end
 
@@ -71,10 +76,10 @@ d = PhaseType(S, α)
 - Integer inputs are automatically converted to floating-point
 """
 function Hypoexponential(λ::AbstractVector{T}; check_args::Bool = true) where {T <: Real}
-    Hypoexponential{T}(λ; check_args = check_args)
+    return Hypoexponential{T}(λ; check_args = check_args)
 end
 function Hypoexponential(λ::AbstractVector{Integer}; check_args::Bool = true)
-    Hypoexponential{eltype(float.(λ))}(float.(λ); check_args = check_args)
+    return Hypoexponential{eltype(float.(λ))}(float.(λ); check_args = check_args)
 end
 
 struct HypoexponentialSampler{T <: Real} <: Sampleable{Univariate, Continuous}
@@ -89,11 +94,11 @@ function sampler(d::Hypoexponential)
 end
 
 function rand(rng::AbstractRNG, s::HypoexponentialSampler)
-    sum(rand.(rng, s.dists))
+    return sum(rand.(rng, s.dists))
 end
 
 function rand(rng::AbstractRNG, d::Hypoexponential)
-    sum(rand.(rng, Exponential.(1 ./ d.λ)))
+    return sum(rand.(rng, Exponential.(1 ./ d.λ)))
 end
 
 #other functions

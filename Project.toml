@@ -1,7 +1,7 @@
 name = "PhaseTypeDistributions"
 uuid = "08b9a7ee-cab5-43f1-84cc-91ff3c97629e"
 authors = ["GBarnsley <63357847+GBarnsley@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"

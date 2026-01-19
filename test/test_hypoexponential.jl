@@ -28,7 +28,7 @@ using PhaseTypeDistributions
         expected_s0 = [0.0, 0.0, λ[3]]
         @test hypo.S⁰ ≈ expected_s0
 
-        # Test integer inputs work correctly 
+        # Test integer inputs work correctly
         λ_int = [1, 2, 3]
         @test_nowarn Hypoexponential(λ_int)
         hypo_int = Hypoexponential(λ_int)
@@ -144,9 +144,11 @@ using PhaseTypeDistributions
         hypo = Hypoexponential(λ)
 
         # Manually construct equivalent PhaseType
-        S_manual = [-1.0 1.0 0.0;
-                    0.0 -2.0 2.0;
-                    0.0 0.0 -3.0]
+        S_manual = [
+            -1.0 1.0 0.0;
+            0.0 -2.0 2.0;
+            0.0 0.0 -3.0
+        ]
         α_manual = [1.0, 0.0, 0.0]
         pt_manual = PhaseType(S_manual, α_manual)
 
